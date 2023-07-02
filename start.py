@@ -81,7 +81,6 @@ class Computer_Player:
         
         self.kaitoGame.updatePosition(move_to_play)
         
-        
     def calculate_best_move_recursive(self,spielstand,iterations=10,maximize=1):
         
         quality_of_this_move = []
@@ -259,7 +258,7 @@ if __name__ == "__main__":
     surface = Kaito_App()
     randomPlayer1 = Computer_Player(surface.kaitoGame,"schwarz")
     
-    for i in range(10):
+    for i in range(0):
     
         siege_rot_schwarz,training_data,training_labels = playGames(30)
         
