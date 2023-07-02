@@ -1,7 +1,7 @@
 # Kaito-Agent
 Developing an intelligent player for the chess-like board game Kaito
 
-![User interface for Kaito](User_Interface.png "User interface for Kaito")
+![User interface for Kaito](Images/User_Interface.png "User interface for Kaito")
 
 ## Development Steps
 
