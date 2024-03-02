@@ -46,7 +46,7 @@ class Computer_Player:
 
         self.total_iterations = 0
         
-        move_to_play, evaluation = self.calculate_best_move_recursive(self.kaitoGame.spielstand, self.iterations)
+        move_to_play, evaluation = self.calculate_best_move_recursive(self.kaitoGame.spielstand)
         
         print(f"Total iterations needed for tree search: {self.total_iterations}")
         
@@ -54,55 +54,56 @@ class Computer_Player:
         
         self.kaitoGame.updatePosition(move_to_play)
         
-    def calculate_best_move_recursive(self,spielstand,iterations,maximize=1):
+    def calculate_best_move_recursive(self,spielstand,depth=0,primary=-np.inf,secondary=np.inf):
         
         self.total_iterations += 1
         
-        quality_of_this_move = []
-        
         # wenn self.kaitoGame.all_legal_moves [] empty dann füge einen Sieg für den Gegner ein
         
-        min_or_max = np.max if maximize % 2 == 1 else np.min
+        
+        min_or_max = [np.max, np.min] if depth % 2 == 0 else [np.min, np.max]
+        
+        bestval = min_or_max[1]([np.inf,-np.inf])
+        best_move = None
         
         for next_move in self.kaitoGame.all_legal_moves(spielstand):
             
             ## move is in [0,36]
             
-            ## Durchsuche alle möglichen Züge, die der Spieler hat
+            ## Durchsusche alle möglichen Züge, die der Spieler hat
             
-            if iterations > 1:
-                print("Move:", next_move,"   Iteration:", iterations, "Spielzug Nr.", spielstand["spielzug_count"])
+            if depth >= 0:
+                print("Move:", next_move,"   Depth:", depth, "Spielzug Nr.", spielstand["spielzug_count"])
             
             next_spielstand = self.kaitoGame.project_move(copy.deepcopy(spielstand), next_move)
                 
-            if iterations > 0:
+            if depth < self.iterations:
                 
-                # Verwende als Evaluation nur Max oder Min der Evaluations aller nachfolgenden Züge
-                
-                best_next_move, next_move_evaluation = self.calculate_best_move_recursive(copy.deepcopy(next_spielstand), iterations - 1,maximize + 1)               
-                    
-                
-                
-                quality_of_this_move.append(next_move_evaluation)
+                _, next_move_evaluation = self.calculate_best_move_recursive(copy.deepcopy(next_spielstand), depth + 1, secondary, primary)               
             
             else:
                 
-                evaluation = evalNN(self.kaitoGame.matrix_from_spielstand(next_spielstand,self.which_player[0]))
+                next_move_evaluation = evalNN(self.kaitoGame.matrix_from_spielstand(next_spielstand, self.which_player[0]))
                 
-                quality_of_this_move.append(evaluation)
+            bestval = min_or_max[0]([bestval, next_move_evaluation])
+                
+            if bestval == next_move_evaluation:
+                
+                best_move = next_move
+            
+            primary = min_or_max[0]([primary, bestval])
+            
+            if min_or_max[0]([primary,secondary]) == primary:
+                print(f"Cut out branch at depth {depth}")
+                break
             
         # If quality_of_opponent_move [] empty dann füge einen Sicheren Sieg  ein
 
-        if len(quality_of_this_move) == 0:
+        if False: #len(quality_of_this_move) == 0:
             
             return -1,-100
-        else: 
-            
-            best_evaluation = min_or_max(quality_of_this_move)
-        
-        best_own_move = self.kaitoGame.all_legal_moves(spielstand)[quality_of_this_move.index(best_evaluation)]
-        
-        return best_own_move,best_evaluation
+    
+        return best_move, bestval
 
 def matrix_2_to_3(eigene_fremde_steine):
     
