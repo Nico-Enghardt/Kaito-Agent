@@ -63,9 +63,9 @@ class Kaito:
                 
         return legalMoves # list of all possible moves with respective (count,(spalte,reihe))
         
-    def is_move_legal(self,spielstand,move_count):
+    def is_move_legal(self, spielstand, move_count):
         
-        moveSpalte,moveReihe = position_from_count(move_count)
+        moveSpalte, moveReihe = position_from_count(move_count)
         cursorSpalte,cursorReihe = position_from_count(spielstand["cursor"])
         
         typ = spielstand["spielsteine"][move_count][1:]
@@ -118,7 +118,7 @@ class Kaito:
         spalte,reihe = position_from_count(count)
         return "feld"+str(spalte)+"_"+str(reihe)
     
-    def updatePosition(self,suggested_move_count):
+    def updatePosition(self, suggested_move_count):
         
         if self.is_move_legal(self.spielstand,suggested_move_count):
             self.move_history.append([copy.deepcopy(self.spielstand),suggested_move_count])
@@ -205,14 +205,14 @@ class Kaito:
             
             print("Game was finished by no available move.")
 
-    def project_move(self,spielstand,suggested_move):
+    def project_move(self, spielstand, suggested_move):
         
         # Ziehe Zug, Berechne neue Matrix
         
         entfernterStein = spielstand["spielsteine"][suggested_move]
         besitzer,typ = entfernterStein[0],entfernterStein[1:] # Schneidet das e von empty ab
         
-        if not self.is_move_legal(spielstand,suggested_move):
+        if not self.is_move_legal(spielstand, suggested_move):
             
             print("Suggested move to play was illegal!")
             
@@ -228,6 +228,7 @@ class Kaito:
         spielstand["cursor"] = suggested_move
         
         spielstand["spielzug_count"] += 1
+        
             
         return spielstand
 
