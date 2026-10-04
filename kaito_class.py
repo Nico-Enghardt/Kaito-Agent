@@ -46,7 +46,7 @@ class Kaito:
         
             self.players[0].your_turn()
     
-    def all_legal_moves(self,spielstand=None):
+    def all_legal_moves(self, spielstand=None):
         
         if not spielstand:
             #print("Used self.spielstand")
@@ -103,13 +103,16 @@ class Kaito:
             
             self.view.draw()
 
-    def s_r_to_binary(self,input):
+    def s_r_to_binary(self,input, mode=""):
         
         if input == "s":
             return 1
         
-        if input == "r":
+        if input == "r" and mode=="0_1":
             return 0
+        
+        if input == "r":
+            return - 1
         
         else: return 10000
     
@@ -139,7 +142,7 @@ class Kaito:
     
         spieler_am_zug = self.players[self.whooseTurn()[0]]
         
-        self.whoLost()
+        self.whoLost(verbose=1)
     
         if self.view:
             
@@ -149,7 +152,13 @@ class Kaito:
             
             spieler_am_zug.your_turn()
     
+    def update_evaluation(self, eval):
         
+        if self.view:
+            
+            eval = 1000 if eval == np.inf else eval
+            
+            self.view.evalBar.setValue(int(eval))
     
     def countMon(self,besitzer,typ,spielstand=None):
         
@@ -167,43 +176,50 @@ class Kaito:
         
         return new_Konto_R_S
         
-    def whoLost(self,spielstand = None):
+    def whoLost(self,spielstand = None, verbose=0):
         
         if spielstand == None:
             
             spielstand = self.spielstand
-        
-        def somebodyLost(vector):
             
-           # if  vector[0] <= 0:
+        message = ""
+        
+        def somebodyLost(vector, message):
+            
+            if  vector[0] <= 0:
                 
-                #print("All Katanas were lost.")
+                message += "All Katanas were lost."
                 
-            #if  vector[1] <= 0:
+            if  vector[1] <= 0:
                 
-                #print("All Kabutos were lost.")
+                message += "All Kabutos were lost."
             
             return vector[0] <= 0 or vector[1] <= 0
         
-        if somebodyLost(self.spielstand["anzahlen"][0]):
+        
+        if somebodyLost(spielstand["anzahlen"][0], message):
             
-            self.spielstand["game_finished_winner"] = (True,"s")
-            print("Schwarz hat gewonnen.")
+            spielstand["game_finished_winner"] = (True,"s")
+            message += "Schwarz hat gewonnen."
             
-        if somebodyLost(self.spielstand["anzahlen"][1]):
+        if somebodyLost(spielstand["anzahlen"][1], message):
             
-            self.spielstand["game_finished_winner"] = (True,"r")
-            print("Rot hat gewonnen.")
+            spielstand["game_finished_winner"] = (True,"r")
+            message += "Rot hat gewonnen. "
+            
 
         if len(self.all_legal_moves()) == 0:
+            message += "\nGame was finished by no available move."""
             
             winner_bin = (self.whooseTurn()[0] + 1) % 2
             
             winner = "r" if winner_bin == 0 else "s"
             
-            self.spielstand["game_finished_winner"] = (True,winner)
+            spielstand["game_finished_winner"] = (True, winner)
             
-            print("Game was finished by no available move.")
+        if verbose == 1 and message != "":
+            
+            print(message)
 
     def project_move(self, spielstand, suggested_move):
         
@@ -211,6 +227,8 @@ class Kaito:
         
         entfernterStein = spielstand["spielsteine"][suggested_move]
         besitzer,typ = entfernterStein[0],entfernterStein[1:] # Schneidet das e von empty ab
+        
+        print("Last Move:", entfernterStein)
         
         if not self.is_move_legal(spielstand, suggested_move):
             
@@ -222,7 +240,7 @@ class Kaito:
         
         if not typ == "mpt":
         
-            spielstand["anzahlen"][self.s_r_to_binary(besitzer),steine.index(typ)] -= 1
+            spielstand["anzahlen"][self.s_r_to_binary(besitzer,mode="0_1"),steine.index(typ)] -= 1
 
         spielstand["spielsteine"][suggested_move] = "empt"
         spielstand["cursor"] = suggested_move
@@ -260,8 +278,7 @@ class Kaito_App(QtWidgets.QMainWindow):
         self.newKabuto.clicked.connect(lambda : self.kaitoGame.put("Kab"))
         self.newKatana.clicked.connect(lambda : self.kaitoGame.put("Kat"))
         
-       
-                
+   
         for count in range(36):
                         
             variableName = self.kaitoGame.name_from_count(count)

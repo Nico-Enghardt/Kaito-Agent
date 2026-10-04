@@ -6,9 +6,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 from conversions import *
-from computer_player import * 
-
-
+# from computer_player import * 
 
 training_data = []
 training_labels = []
@@ -107,24 +105,21 @@ if __name__ == "__main__":
     
     i = 0
     
-    for i in range(0):
+    # for i in range(0):
     
-        print(f"Play {i*2+1} training games ComputerPlayer vs. ComputerPlayer")
-        siege_rot_schwarz = playGames(100, mode="random",verbose=1)
+    #     print(f"Play {i*2+1} training games ComputerPlayer vs. ComputerPlayer")
+    #     siege_rot_schwarz = playGames(5, mode="train",verbose=1)
         
-        print(len(training_data), len(training_labels))
-        loss_history += estimator.fit(np.array(training_data), np.array(training_labels), epochs=4, verbose=1).history["loss"]
-        estimator.save(estimator_path)
+    #     print(len(training_data), len(training_labels))
+    #     loss_history += estimator.fit(np.array(training_data), np.array(training_labels), epochs=4, verbose=1).history["loss"]
+    #     estimator.save(estimator_path)
         
-    print(f"Play {i+1} evaluation games ComputerPlayer vs. RandomPlayer")   
-    siege_rot_schwarz = playGames(i+1,mode="evaluate")
+    # print(f"Play {i+1} evaluation games ComputerPlayer vs. RandomPlayer")   
+    # siege_rot_schwarz = playGames(i+1,mode="evaluate")
+    # print(siege_rot_schwarz)
     
     app = QtWidgets.QApplication(sys.argv)
-    surface = Kaito_App()
-    randomPlayer1 = Computer_Player(surface.kaitoGame,"schwarz")
-    randomPlayer1.iterations = 4
-    
-    plt.plot(loss_history)
-    plt.show()
+    kaito_app = Kaito_App()
+    # randomPlayer1 = FastComputerPlayer(kaito_app.kaitoGame,"schwarz")
         
     app.exec()
